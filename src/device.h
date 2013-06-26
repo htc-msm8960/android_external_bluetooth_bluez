@@ -24,6 +24,43 @@
 
 #define DEVICE_INTERFACE	"org.bluez.Device"
 
+#ifdef BT_ALT_STACK
+// These are duplicated in two more places
+// TODO: Consolidate
+#define PANU_UUID           "00001115-0000-1000-8000-00805f9b34fb"
+#define NAP_UUID            "00001116-0000-1000-8000-00805f9b34fb"
+#define GN_UUID             "00001117-0000-1000-8000-00805f9b34fb"
+
+#define SERIAL_PORT_UUID    "00001101-0000-1000-8000-00805F9B34FB"
+#define DIALUP_NET_UUID     "00001103-0000-1000-8000-00805F9B34FB"
+
+#define SYNC_UUID "00001104-0000-1000-8000-00805F9B34FB"
+#define OPP_UUID  "00001105-0000-1000-8000-00805F9B34FB"
+
+#define FILE_TRANSFER_UUID  "00001106-0000-1000-8000-00805F9B34FB"
+
+#define CTP_UUID  "00001109-0000-1000-8000-00805F9B34FB"
+#define ICP_UUID  "00001110-0000-1000-8000-00805F9B34FB"
+
+#define BPP_UUID  "00001122-0000-1000-8000-00805F9B34FB"
+
+#define FAX_UUID  "00001111-0000-1000-8000-00805F9B34FB"
+#define LAP_UUID  "00001102-0000-1000-8000-00805F9B34FB"
+
+#define BIP_UUID  "0000111A-0000-1000-8000-00805F9B34FB"
+#define PBAP_UUID "00001130-0000-1000-8000-00805F9B34FB"
+
+#define VIDEO_DIST_UUID "00001305-0000-1000-8000-00805F9B34FB"
+#define SIM_ACC_UUID    "0000112D-0000-1000-8000-00805F9B34FB"
+
+#define PNP_UUID "00001200-0000-1000-8000-00805F9B34FB"
+//MAP related uuids
+#define MAP_UUID "00001134-0000-1000-8000-00805F9B34FB"
+#define MSE_UUID "00001132-0000-1000-8000-00805F9B34FB"
+#define MNS_UUID "00001133-0000-1000-8000-00805F9B34FB"
+#define HID_UUID "00001124-0000-1000-8000-00805f9b34fb"
+#endif //BT_ALT_STACK
+
 struct btd_device;
 
 typedef enum {
@@ -72,6 +109,7 @@ gboolean device_is_temporary(struct btd_device *device);
 gboolean device_is_paired(struct btd_device *device);
 gboolean device_is_trusted(struct btd_device *device);
 void device_set_paired(struct btd_device *device, gboolean paired);
+
 void device_set_temporary(struct btd_device *device, gboolean temporary);
 void device_set_type(struct btd_device *device, device_type_t type);
 void device_set_bonded(struct btd_device *device, gboolean bonded);
@@ -118,3 +156,10 @@ void btd_unregister_device_driver(struct btd_device_driver *driver);
 
 struct btd_device *btd_device_ref(struct btd_device *device);
 void btd_device_unref(struct btd_device *device);
+
+#ifdef BT_ALT_STACK
+gboolean device_is_weak_linkkey(struct btd_device *device);
+#if defined(BLE_ENABLED)
+uint8_t device_authr_is_le_only(struct btd_device *device);
+#endif
+#endif //BT_ALT_STACK

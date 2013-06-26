@@ -44,22 +44,20 @@ LOCAL_SHARED_LIBRARIES := \
 	libdbus \
 	libglib
 
-ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
-ifeq ($(BOARD_USES_ALSA_AUDIO),true)
-LOCAL_CFLAGS += -DA2DP_48000_SAMPLE_RATE
-endif
-endif
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/bluez-plugin
 LOCAL_UNSTRIPPED_PATH := $(TARGET_OUT_SHARED_LIBRARIES_UNSTRIPPED)/bluez-plugin
 LOCAL_MODULE := audio
 
 include $(BUILD_SHARED_LIBRARY)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # liba2dp
 # This is linked to Audioflinger so **LGPL only**
-
+ifneq ($(HAVE_CUSTOM_BRCM_BTLA),true)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -84,17 +82,11 @@ LOCAL_CFLAGS:= -funroll-loops
 
 LOCAL_C_INCLUDES:= \
 	$(LOCAL_PATH)/../sbc \
-	../../../../frameworks/base/include \
-	system/bluetooth/bluez-clean-headers
+	../../../../$(BSP_BASE_DIRX)frameworks/base/include \
+	$(call include-path-for,bluedroid)/../../bluez-clean-headers
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils
-
-ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
-ifeq ($(BOARD_USES_ALSA_AUDIO),true)
-LOCAL_CFLAGS += -DA2DP_48000_SAMPLE_RATE
-endif
-endif
 
 ifneq ($(wildcard system/bluetooth/legacy.mk),)
 LOCAL_STATIC_LIBRARIES := \
@@ -112,3 +104,7 @@ endif
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
+endif

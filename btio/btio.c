@@ -1268,9 +1268,16 @@ static GIOChannel *create_io(BtIOType type, gboolean server,
 			ERROR_FAILED(err, "socket(RAW, L2CAP)", errno);
 			return NULL;
 		}
+#ifdef BT_ALT_STACK
+		//Bind not supported for client connection in BTLA
+		if (server && l2cap_bind(sock, &opts->src, server ? opts->psm : 0,
+							opts->cid, err) < 0)
+			goto failed;
+#else
 		if (l2cap_bind(sock, &opts->src, server ? opts->psm : 0,
 							opts->cid, err) < 0)
 			goto failed;
+#endif
 		if (!l2cap_set(sock, opts->sec_level, 0, 0, 0, -1, -1, opts->force_active,
 					err))
 			goto failed;
@@ -1281,9 +1288,16 @@ static GIOChannel *create_io(BtIOType type, gboolean server,
 			ERROR_FAILED(err, "socket(SEQPACKET, L2CAP)", errno);
 			return NULL;
 		}
+#ifdef BT_ALT_STACK
+		//Bind not supported for client connection in BTLA
+		if (server && l2cap_bind(sock, &opts->src, server ? opts->psm : 0,
+							opts->cid, err) < 0)
+			goto failed;
+#else
 		if (l2cap_bind(sock, &opts->src, server ? opts->psm : 0,
 							opts->cid, err) < 0)
 			goto failed;
+#endif
 		if (!l2cap_set(sock, opts->sec_level, opts->imtu, opts->omtu,
 				opts->mode, opts->master, opts->flushable,
 				opts->force_active, err))
@@ -1295,9 +1309,16 @@ static GIOChannel *create_io(BtIOType type, gboolean server,
 			ERROR_FAILED(err, "socket(STREAM, RFCOMM)", errno);
 			return NULL;
 		}
+#ifdef BT_ALT_STACK
+		//Bind not supported for client connection in BTLA
+		if (server && rfcomm_bind(sock, &opts->src,
+					server ? opts->channel : 0, err) < 0)
+			goto failed;
+#else
 		if (rfcomm_bind(sock, &opts->src,
 					server ? opts->channel : 0, err) < 0)
 			goto failed;
+#endif
 		if (!rfcomm_set(sock, opts->sec_level, opts->master,
 					opts->force_active, err))
 			goto failed;
@@ -1308,8 +1329,14 @@ static GIOChannel *create_io(BtIOType type, gboolean server,
 			ERROR_FAILED(err, "socket(SEQPACKET, SCO)", errno);
 			return NULL;
 		}
+#ifdef BT_ALT_STACK
+		//Bind not supported for client connection in BTLA
+		if (server && sco_bind(sock, &opts->src, err) < 0)
+			goto failed;
+#else
 		if (sco_bind(sock, &opts->src, err) < 0)
 			goto failed;
+#endif
 		if (!sco_set(sock, opts->mtu, err))
 			goto failed;
 		break;

@@ -149,6 +149,9 @@ gboolean plugin_init(GKeyFile *config, const char *enable, const char *disable)
 	else
 		cli_disabled = NULL;
 
+#ifdef BT_ALT_STACK
+	//For BTLA, do not load built in plugins
+#else
 	DBG("Loading builtin plugins");
 
 	for (i = 0; __bluetooth_builtin[i]; i++) {
@@ -158,6 +161,7 @@ gboolean plugin_init(GKeyFile *config, const char *enable, const char *disable)
 
 		add_plugin(NULL,  __bluetooth_builtin[i]);
 	}
+#endif
 
 	if (strlen(PLUGINDIR) == 0)
 		goto start;
@@ -173,9 +177,17 @@ gboolean plugin_init(GKeyFile *config, const char *enable, const char *disable)
 		void *handle;
 		gchar *filename;
 
+#ifdef BT_ALT_STACK
+		//For BTLA, only load HID plugin
+		if (0 != strcmp(file, "hiddevice.so")) {
+			error("Skipping plugin %s", file);
+			continue;
+		}
+#else
 		if (g_str_has_prefix(file, "lib") == TRUE ||
 				g_str_has_suffix(file, ".so") == FALSE)
 			continue;
+#endif
 
 		filename = g_build_filename(PLUGINDIR, file, NULL);
 

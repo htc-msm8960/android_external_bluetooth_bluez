@@ -233,6 +233,7 @@ void register_device_id(const uint16_t vendor, const uint16_t product,
 
 int add_record_to_server(const bdaddr_t *src, sdp_record_t *rec)
 {
+#ifndef BT_ALT_STACK
 	sdp_data_t *data;
 	sdp_list_t *pattern;
 
@@ -270,6 +271,7 @@ int add_record_to_server(const bdaddr_t *src, sdp_record_t *rec)
 
 	update_db_timestamp();
 
+#endif
 	return 0;
 }
 

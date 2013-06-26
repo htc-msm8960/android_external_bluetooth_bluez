@@ -14,3 +14,6 @@ LOCAL_C_INCLUDES:= \
 LOCAL_MODULE:=libgdbus_static
 
 include $(BUILD_STATIC_LIBRARY)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif

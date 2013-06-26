@@ -682,7 +682,8 @@ int write_trust(const char *src, const char *addr, const char *service,
 	/* If the old setting is the same as the requested one, we're done */
 	if (trusted == trust) {
 		g_slist_free(services);
-		free(str);
+		if (str)
+			free(str);
 		return 0;
 	}
 
@@ -702,7 +703,8 @@ int write_trust(const char *src, const char *addr, const char *service,
 
 	g_slist_free(services);
 
-	free(str);
+	if (str)
+		free(str);
 
 	return ret;
 }
@@ -1343,3 +1345,123 @@ device_type_t read_device_type(const bdaddr_t *sba, const bdaddr_t *dba)
 
 	return type;
 }
+
+#ifdef BT_ALT_STACK
+int write_hid_info(bdaddr_t *local, bdaddr_t *peer, char *hid_info)
+{
+	char filename[PATH_MAX + 1], addr[18];
+
+	create_filename(filename, PATH_MAX, local, "hidinfo");
+
+	create_file(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+	ba2str(peer, addr);
+	return textfile_put(filename, addr, hid_info);
+}
+
+int read_hid_info(const char *src, const char *dst, char *hid_info)
+{
+	char filename[PATH_MAX + 1], *str;
+
+	create_name(filename, PATH_MAX, STORAGEDIR, src, "hidinfo");
+
+	str = textfile_get(filename, dst);
+	if (!str)
+		return -ENOENT;
+
+	strcpy(hid_info, str);
+
+	free(str);
+
+	return 0;
+}
+#ifdef BLE_ENABLED
+int write_ble_link_key(bdaddr_t *local, bdaddr_t *peer, unsigned char *key, uint8_t type, int length)
+{
+	int i;
+	char filename[PATH_MAX + 1], addr[18], str[64+4], addr_and_type[24];
+
+	memset(str, 0, sizeof(str));
+
+	for (i = 0; i < length; i++)
+		sprintf(str + (i * 2), "%2.2X", key[i]);
+
+	create_filename(filename, PATH_MAX, local, "blelinkkeys");
+	create_file(filename, S_IRUSR | S_IWUSR);
+
+	ba2str(peer, addr);
+
+	//concat type to bdaddr
+	sprintf(addr_and_type, "%s-%02x", addr, type);
+
+	return textfile_put(filename, addr_and_type, str);
+}
+
+int read_ble_link_key(bdaddr_t *local, bdaddr_t *peer, uint8_t type, int * length, unsigned char *key )
+{
+	int i;
+	char filename[PATH_MAX + 1], addr[18], tmp[3], *str, addr_and_type[24];
+
+	create_filename(filename, PATH_MAX, local, "blelinkkeys");
+
+	ba2str(peer, addr);
+
+	//concat type to bdaddr
+	sprintf(addr_and_type, "%s-%02x", addr, type);
+	str = textfile_get(filename, addr_and_type);
+
+	if (!str)
+		return -ENOENT;
+
+	if (!key) {
+		free(str);
+		return 0;
+	}
+
+	memset(tmp, 0, sizeof(tmp));
+
+	*length = strlen(str);
+
+	for (i = 0; i < *length; i++) {
+		memcpy(tmp, str + (i * 2), 2);
+		key[i] = (uint8_t) strtol(tmp, NULL, 16);
+	}
+
+	free(str);
+	return 0;
+}
+
+int write_address_type(bdaddr_t *local, bdaddr_t *peer, uint8_t addr_type)
+{
+	char filename[PATH_MAX + 1], addr[18], str[9];
+
+	create_filename(filename, PATH_MAX, local, "addrtype");
+	create_file(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+	ba2str(peer, addr);
+	sprintf(str, "0x%02x", addr_type);
+
+	return textfile_put(filename, addr, str);
+}
+
+int read_address_type(bdaddr_t *local, bdaddr_t *peer, uint32_t * addr_type )
+{
+	char filename[PATH_MAX + 1], addr[18], *str;
+
+	create_filename(filename, PATH_MAX, local, "addrtype");
+	ba2str(peer, addr);
+
+	str = textfile_get(filename, addr);
+	if (!str)
+		return -ENOENT;
+
+	if (sscanf(str, "%x", addr_type) != 1) {
+		free(str);
+		return -ENOENT;
+	}
+
+	free(str);
+	return 0;
+}
+#endif
+#endif //BT_ALT_STACK

@@ -65,6 +65,10 @@
 
 #define DEFAULT_DISCOVERABLE_TIMEOUT 180 /* 3 minutes */
 
+#ifdef BT_ALT_STACK
+#include <cutils/properties.h>
+#endif
+
 struct main_opts main_opts;
 
 static GKeyFile *load_config(const char *file)
@@ -307,7 +311,11 @@ void btd_stop_exit_timer(void)
 	last_adapter_timeout = 0;
 }
 
+#ifdef BT_ALT_STACK
+void disconnect_dbus(void)
+#else
 static void disconnect_dbus(void)
+#endif
 {
 	DBusConnection *conn = get_dbus_connection();
 
@@ -321,7 +329,11 @@ static void disconnect_dbus(void)
 	dbus_connection_unref(conn);
 }
 
+#ifdef BT_ALT_STACK
+int connect_dbus(void)
+#else
 static int connect_dbus(void)
+#endif
 {
 	DBusConnection *conn;
 	DBusError err;
@@ -374,6 +386,29 @@ static GOptionEntry options[] = {
 	{ NULL },
 };
 
+#ifdef BT_ALT_STACK
+int main(int argc, char *argv[])
+{
+	/* Unfortunately Android's init.rc does not yet support applying
+	 * capabilities. So we must do it in-process. */
+	DBG("%s:main(): calling android_set_aid_and_cap", argv[0]);
+
+	void *android_set_aid_and_cap(void);
+	//android_set_aid_and_cap();
+	char value[PROPERTY_VALUE_MAX];
+	sprintf(value, "%d", getpid());
+	property_set("service.brcm.bt.bluetoothd_pid", value);
+
+	init_defaults();
+
+	dtun_client_main();
+
+	property_set("service.brcm.bt.bluetoothd_pid", "0");
+	property_set("ctl.stop", "bluetoothd");
+	return 0;
+}
+
+#else
 int main(int argc, char *argv[])
 {
 	GOptionContext *context;
@@ -522,3 +557,5 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+#endif //BT_ALT_STACK
+

@@ -889,6 +889,9 @@ int hci_get_route(bdaddr_t *bdaddr)
 
 int hci_devid(const char *str)
 {
+#ifdef BT_ALT_STACK
+	return 0;
+#else
 	bdaddr_t ba;
 	int id = -1;
 
@@ -903,6 +906,7 @@ int hci_devid(const char *str)
 	}
 
 	return id;
+#endif //BT_ALT_STACK
 }
 
 int hci_devinfo(int dev_id, struct hci_dev_info *di)

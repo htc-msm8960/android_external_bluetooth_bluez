@@ -36,3 +36,6 @@ LOCAL_UNSTRIPPED_PATH := $(TARGET_OUT_SHARED_LIBRARIES_UNSTRIPPED)/bluez-plugin
 LOCAL_MODULE:=libbuiltinplugin
 
 include $(BUILD_STATIC_LIBRARY)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif

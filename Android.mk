@@ -13,6 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-ifeq ($(BOARD_HAVE_BLUETOOTH),true)
+ifeq ($(BOARD_HAVE_BLUETOOTH_BLUEZ),true)
+ifeq ($(SUPER_LINE),true)
+ifeq ($(BOARD_HAVE_BLUETOOTH_BRCM),true)
   include $(all-subdir-makefiles)
+endif
+else
+  include $(all-subdir-makefiles)
+endif
 endif

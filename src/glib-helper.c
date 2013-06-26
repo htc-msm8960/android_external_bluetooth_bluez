@@ -407,8 +407,11 @@ char *bt_uuid2string(uuid_t *uuid)
 	str = g_try_malloc0(MAX_LEN_UUID_STR);
 	if (!str)
 		return NULL;
-
+#ifdef BT_ALT_STACK
+	sprintf(str, "%.8X-%.4X-%.4X-%.4X-%.8X%.4X",
+#else
 	sprintf(str, "%.8x-%.4x-%.4x-%.4x-%.8x%.4x",
+#endif
 			g_ntohl(data0), g_ntohs(data1),
 			g_ntohs(data2), g_ntohs(data3),
 			g_ntohl(data4), g_ntohs(data5));

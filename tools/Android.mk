@@ -24,6 +24,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=avinfo
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # sdptool
@@ -47,6 +50,9 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MODULE:=sdptool
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # hciconfig
@@ -75,8 +81,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=hciconfig
 
 include $(BUILD_EXECUTABLE)
-
-ifneq ($(BOARD_HAVE_BLUETOOTH_CUSTOM_HCITOOL), true)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # hcitool
@@ -103,6 +110,8 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=hcitool
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
 endif
 
 #
@@ -126,8 +135,10 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=l2ping
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
-ifneq ($(BOARD_HAVE_BLUETOOTH_CUSTOM_HCIATTACH), true)
 #
 # hciattach
 #
@@ -158,6 +169,8 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MODULE:=hciattach
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
 endif
 
 #
@@ -189,6 +202,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=rfcomm
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 ifeq ($(BOARD_HAVE_BLUETOOTH_CSR),true)
 #
@@ -221,4 +237,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE:=bccmd
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 endif

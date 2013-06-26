@@ -77,6 +77,9 @@ struct remote_dev_info {
 	GSList *services;
 	uint8_t bdaddr_type;
 	uint8_t flags;
+#if defined(BT_ALT_STACK) && defined(BLE_ENABLED)
+	uint8_t dev_type;
+#endif
 };
 
 void btd_adapter_start(struct btd_adapter *adapter);
@@ -106,10 +109,18 @@ void adapter_get_address(struct btd_adapter *adapter, bdaddr_t *bdaddr);
 void adapter_set_state(struct btd_adapter *adapter, int state);
 int adapter_get_state(struct btd_adapter *adapter);
 int adapter_get_discover_type(struct btd_adapter *adapter);
+#ifdef BT_ALT_STACK
+void adapter_set_bdaddr(struct btd_adapter *adapter, bdaddr_t *bda);
+void adapter_set_cod(struct btd_adapter *adapter, uint32_t cod, gboolean send_event);
+uint32_t btd_adapter_get_class(struct btd_adapter *adapter, uint8_t *major, uint8_t minor);
+#endif
 struct remote_dev_info *adapter_search_found_devices(struct btd_adapter *adapter,
 						struct remote_dev_info *match);
 void adapter_update_found_devices(struct btd_adapter *adapter, bdaddr_t *bdaddr,
 						uint32_t class, int8_t rssi,
+#if defined(BT_ALT_STACK) && defined(BLE_ENABLED)
+						uint8_t dev_type,
+#endif
 						uint8_t *data);
 int adapter_remove_found_device(struct btd_adapter *adapter, bdaddr_t *bdaddr);
 void adapter_emit_device_found(struct btd_adapter *adapter,

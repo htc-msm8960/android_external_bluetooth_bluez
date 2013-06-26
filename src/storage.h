@@ -84,9 +84,18 @@ char *read_device_characteristics(const bdaddr_t *sba, const bdaddr_t *dba,
 int write_device_attribute(const bdaddr_t *sba, const bdaddr_t *dba,
                                         uint16_t handle, const char *chars);
 int read_device_attributes(const bdaddr_t *sba, textfile_cb func, void *data);
-int write_device_type(const bdaddr_t *sba, const bdaddr_t *dba,
-						device_type_t type);
-device_type_t read_device_type(const bdaddr_t *sba, const bdaddr_t *dba);
 
+#ifdef BT_ALT_STACK
+int write_hid_info(bdaddr_t *local, bdaddr_t *peer, char *hid_info);
+int read_hid_info(const char *src, const char *dst, char *hid_info);
+#ifdef BLE_ENABLED
+int write_ble_link_key(bdaddr_t *local, bdaddr_t *peer, unsigned char *key, uint8_t type, int length);
+int read_ble_link_key(bdaddr_t *local, bdaddr_t *peer, uint8_t type, int * length, unsigned char *key);
+int write_device_type(const bdaddr_t *sba, const bdaddr_t *dba, device_type_t type);
+device_type_t read_device_type(const bdaddr_t *sba, const bdaddr_t *dba);
+int write_address_type(bdaddr_t *local, bdaddr_t *peer, uint8_t addr_type);
+int read_address_type(bdaddr_t *local, bdaddr_t *peer, uint32_t *addr_type);
+#endif
+#endif
 #define PNP_UUID		"00001200-0000-1000-8000-00805f9b34fb"
 

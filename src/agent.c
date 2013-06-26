@@ -318,7 +318,12 @@ static int agent_call_authorize(struct agent_request *req,
 				DBUS_TYPE_INVALID);
 
 	if (dbus_connection_send_with_reply(connection, req->msg,
+#ifdef BT_ALT_STACK
+/* BMW carkit requires the reply to the auhorization request within 52 secs to stay connected to */
+					&req->call, 52 * 1000) == FALSE) {
+#else
 					&req->call, REQUEST_TIMEOUT) == FALSE) {
+#endif
 		error("D-Bus send failed");
 		return -EIO;
 	}

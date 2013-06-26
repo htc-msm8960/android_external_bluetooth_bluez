@@ -26,6 +26,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=hstest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # l2test
@@ -51,6 +54,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=l2test
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # rctest
@@ -76,6 +82,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=rctest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 
 #
@@ -102,6 +111,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=scotest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # agent
@@ -128,6 +140,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=agent
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # attest
@@ -153,6 +168,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=attest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # avtest
@@ -178,6 +196,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=avtest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # bdaddr
@@ -203,6 +224,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=bdaddr
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 ifeq ($(BUILD_BTIOTEST),1)
 #
@@ -234,6 +258,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=btiotest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 endif #BTIOTEST
 
 
@@ -270,6 +297,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=hciemu
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 endif #BUILD_HCIEMU
 
 #
@@ -296,6 +326,9 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=lmptest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 
 #
 # sdptest
@@ -321,3 +354,6 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:=sdptest
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif

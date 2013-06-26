@@ -29,4 +29,7 @@ LOCAL_MODULE_TAGS :=
 LOCAL_MODULE:=pand
 
 include $(BUILD_EXECUTABLE)
+ifeq ($(COS_BUILD), true)
+include $(BUILD_BSP_TO_PDK_LIB)
+endif
 endif

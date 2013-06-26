@@ -72,7 +72,11 @@ static uint128_t bluetooth_base_uuid = {
 static sdp_data_t *sdp_copy_seq(sdp_data_t *data);
 static int sdp_attr_add_new_with_length(sdp_record_t *rec,
 	uint16_t attr, uint8_t dtd, const void *value, uint32_t len);
+#ifdef BT_ALT_STACK
+int sdp_gen_buffer(sdp_buf_t *buf, sdp_data_t *d);
+#else
 static int sdp_gen_buffer(sdp_buf_t *buf, sdp_data_t *d);
+#endif
 
 /* Message structure. */
 struct tupla {
@@ -782,7 +786,11 @@ static int sdp_get_data_size(sdp_buf_t *buf, sdp_data_t *d)
 	return data_size;
 }
 
+#ifdef BT_ALT_STACK
+int sdp_gen_buffer(sdp_buf_t *buf, sdp_data_t *d)
+#else
 static int sdp_gen_buffer(sdp_buf_t *buf, sdp_data_t *d)
+#endif
 {
 	int orig = buf->buf_size;
 

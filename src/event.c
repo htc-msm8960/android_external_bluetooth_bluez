@@ -60,10 +60,21 @@
 #include "sdpd.h"
 #include "eir.h"
 
+#ifdef BT_ALT_STACK
+#include "dtun_clnt.h"
+#endif
+
+#ifdef BT_ALT_STACK
+gboolean get_adapter_and_device(bdaddr_t *src, bdaddr_t *dst,
+					struct btd_adapter **adapter,
+					struct btd_device **device,
+					gboolean create)
+#else
 static gboolean get_adapter_and_device(bdaddr_t *src, bdaddr_t *dst,
 					struct btd_adapter **adapter,
 					struct btd_device **device,
 					gboolean create)
+#endif
 {
 	DBusConnection *conn = get_dbus_connection();
 	char peer_addr[18];
@@ -131,23 +142,53 @@ static void pincode_cb(struct agent *agent, DBusError *derr,
 	int err;
 	size_t len;
 	char rawpin[16];
-
+#ifdef BT_ALT_STACK
+	pin_code_reply_cp pr;
+#endif
 	device_get_address(device, &dba);
 
 	len = decode_pin(pincode, rawpin);
+#ifdef BT_ALT_STACK
+	if (derr || !len) {
+		memset(&pr, 0, sizeof(pr));
+		bacpy(&pr.bdaddr, &dba);
+#ifdef BLE_ENABLED
+		dtun_pin_reply(DTUN_METHOD_DM_PIN_NEG_REPLY, &pr, device_authr_is_le_only(device));
+#else
+		dtun_pin_reply(DTUN_METHOD_DM_PIN_NEG_REPLY, &pr);
+#endif
+		return;
+	}
+#else
 	if (derr || !len) {
 		err = btd_adapter_pincode_reply(adapter, &dba, NULL, 0);
 		if (err < 0)
 			goto fail;
 		return;
 	}
+#endif
 
+#ifdef BT_ALT_STACK
+	if (pincode == NULL)
+		return;
+
+	memset(&pr, 0, sizeof(pr));
+	bacpy(&pr.bdaddr, &dba);
+	memcpy(&pr.pin_code, pincode, len);
+	pr.pin_len = len;
+#ifdef BLE_ENABLED
+	dtun_pin_reply(DTUN_METHOD_DM_PIN_REPLY, &pr, device_authr_is_le_only(device));
+#else
+	dtun_pin_reply(DTUN_METHOD_DM_PIN_REPLY, &pr);
+#endif
+	return;
+#else
 	err = btd_adapter_pincode_reply(adapter, &dba, rawpin, len);
 	if (err < 0)
 		goto fail;
 
 	return;
-
+#endif
 fail:
 	error("Sending PIN code reply failed: %s (%d)", strerror(-err), -err);
 }
@@ -179,8 +220,15 @@ static int confirm_reply(struct btd_adapter *adapter,
 	bdaddr_t bdaddr;
 
 	device_get_address(device, &bdaddr);
-
+#ifdef BT_ALT_STACK
+#ifdef BLE_ENABLED
+	return dtun_ssp_confirm_reply(&bdaddr.b, success, device_authr_is_le_only(device));
+#else
+	return dtun_ssp_confirm_reply(&bdaddr.b, success);
+#endif
+#else
 	return btd_adapter_confirm_reply(adapter, &bdaddr, success);
+#endif
 }
 
 static void confirm_cb(struct agent *agent, DBusError *err, void *user_data)
@@ -200,11 +248,14 @@ static void passkey_cb(struct agent *agent, DBusError *err, uint32_t passkey,
 	bdaddr_t bdaddr;
 
 	device_get_address(device, &bdaddr);
-
+#ifdef BT_ALT_STACK
+	error("passkey_cb unimplemented");
+#else
 	if (err)
 		passkey = INVALID_PASSKEY;
 
 	btd_adapter_passkey_reply(adapter, &bdaddr, passkey);
+#endif
 }
 
 int btd_event_user_confirm(bdaddr_t *sba, bdaddr_t *dba, uint32_t passkey)
@@ -316,7 +367,11 @@ static void update_lastused(bdaddr_t *sba, bdaddr_t *dba)
 }
 
 void btd_event_device_found(bdaddr_t *local, bdaddr_t *peer, uint32_t class,
+#if defined(BT_ALT_STACK) && defined(BLE_ENABLED)
+				int8_t rssi, uint8_t dev_type, uint8_t addr_type, uint8_t *data)
+#else
 				int8_t rssi, uint8_t *data)
+#endif
 {
 	struct btd_adapter *adapter;
 
@@ -328,11 +383,20 @@ void btd_event_device_found(bdaddr_t *local, bdaddr_t *peer, uint32_t class,
 
 	update_lastseen(local, peer);
 	write_remote_class(local, peer, class);
+#if defined(BT_ALT_STACK) && defined(BLE_ENABLED)
+	/* store device_type only after pairing. else the device is being treated as paired */
+	// write_device_type(local, peer, dev_type);
+	write_address_type(local, peer, addr_type);
+#endif
 
 	if (data)
 		write_remote_eir(local, peer, data);
 
+#if defined(BT_ALT_STACK) && defined(BLE_ENABLED)
+	adapter_update_found_devices(adapter, peer, class, rssi, dev_type, data);
+#else
 	adapter_update_found_devices(adapter, peer, class, rssi, data);
+#endif
 }
 
 void btd_event_set_legacy_pairing(bdaddr_t *local, bdaddr_t *peer,
@@ -429,11 +493,13 @@ proceed:
 	/* remove from remote name request list */
 	adapter_remove_found_device(adapter, peer);
 
+#ifndef BT_ALT_STACK
 	/* check if there is more devices to request names */
 	if (adapter_resolve_names(adapter) == 0)
 		return;
 
 	adapter_set_state(adapter, STATE_IDLE);
+#endif
 }
 
 int btd_event_link_key_notify(bdaddr_t *local, bdaddr_t *peer,

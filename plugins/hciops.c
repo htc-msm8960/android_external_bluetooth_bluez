@@ -1698,8 +1698,16 @@ static void write_class_complete(int index, uint8_t status)
 	struct dev_info *dev = &devs[index];
 	struct btd_adapter *adapter;
 
+#ifdef BT_ALT_STACK
+	if (status) {
+		error("%s: status = %d...Aborting", __FUNCTION__, status);
+		adapter->pending_cod = 0;
+		return;
+	}
+#else
 	if (status)
 		return;
+#endif
 
 	if (dev->pending_cod == 0)
 		return;
