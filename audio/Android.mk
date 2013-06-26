@@ -82,6 +82,7 @@ LOCAL_CFLAGS:= -funroll-loops
 
 LOCAL_C_INCLUDES:= \
 	$(LOCAL_PATH)/../sbc \
+	$(LOCAL_PATH)/../lib \
 	../../../../$(BSP_BASE_DIRX)frameworks/base/include \
 	$(call include-path-for,bluedroid)/../../bluez-clean-headers
 
